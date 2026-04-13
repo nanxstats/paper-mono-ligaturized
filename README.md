@@ -6,7 +6,7 @@ The generated fonts also promote Paper Mono's slashed zero alternate to the
 default `0` glyph, so editors do not need explicit support for configuring
 OpenType features.
 
-![Paper Mono in Ghostty. Theme: Dracula+](documentation/screenshot-ghostty.png)
+![Paper Mono in Ghostty. With Ghostty configuration `adjust-cell-height = 8`. Theme: Dracula+.](documentation/screenshot-ghostty.png)
 
 ## Setup
 
