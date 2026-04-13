@@ -4,6 +4,8 @@
 - Source fonts come from `paper-mono/fonts/otf/` and there are 8 upright
   weights only; do not assume italic variants exist.
 - Expected outputs land in `fonts/` as `LigaPaperMono-*.otf`.
+- Generated fonts should use the slashed zero by default by copying
+  `zero.zero` onto the base `zero` glyph during the final post-processing step.
 - Keep the existing ligature exclusions: `&&`, `~@`, `\/`, `.?`, `?:`, `?=`,
   `?.`, `??`, `;;`, `/\`.
 - Respect existing changes; never reset or revert unless explicitly told.

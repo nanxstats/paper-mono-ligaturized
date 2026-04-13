@@ -2,6 +2,10 @@
 
 Paper Mono patched with Fira Code ligatures via Ligaturizer.
 
+The generated fonts also promote Paper Mono's slashed zero alternate to the
+default `0` glyph, so editors do not need explicit support for configuring
+OpenType features.
+
 ![Paper Mono in Ghostty. Theme: Dracula+](documentation/screenshot-ghostty.png)
 
 ## Setup
@@ -57,7 +61,9 @@ The Makefile will:
 - Patch Ligaturizer so `renamed_fonts` emits the `Liga Paper Mono` family for
   every Paper Mono weight.
 - Remove the same ligatures that were excluded in the DM Mono version.
-- Run the Ligaturizer build and copy the ligaturized `otf` files into `fonts/`.
+- Post-process the ligaturized fonts so `zero.zero` becomes the default `zero`
+  glyph.
+- Write the ligaturized `otf` files into `fonts/`.
 
 Run `make` to perform the same build and then remove `paper-mono/` and
 `Ligaturizer/` afterward. Run `make clean` to remove both cloned sources and
