@@ -1,6 +1,7 @@
 # Paper Mono Ligaturized
 
-Paper Mono patched with Fira Code ligatures via Ligaturizer.
+[Paper Mono](https://github.com/paper-design/paper-mono) patched with
+Fira Code ligatures via Ligaturizer.
 
 The generated fonts also promote Paper Mono's slashed zero alternate to the
 default `0` glyph, so editors do not need explicit support for configuring
