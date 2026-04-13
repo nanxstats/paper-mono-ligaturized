@@ -6,6 +6,7 @@ PAPER_MONO_DIR := paper-mono
 OUTPUT_DIR := fonts
 LIG_OUTPUT_DIR := $(LIGATURIZER_DIR)/fonts/output
 PAPER_TARGET_DIR := $(LIGATURIZER_DIR)/fonts/paper-mono
+SLASHED_ZERO_SCRIPT := scripts/set_slashed_zero.py
 
 PAPER_MONO_WEIGHTS := \
 	PaperMono-Thin \
@@ -119,8 +120,8 @@ $(LIGATURIZER_DIR)/.built: deps $(LIGATURIZER_DIR)/.patched $(PAPER_TARGET_DIR)/
 $(LIG_OUTPUT_DIR)/%.otf: | $(LIGATURIZER_DIR)/.built
 	@test -f $@
 
-$(OUTPUT_DIR)/%.otf: $(LIG_OUTPUT_DIR)/%.otf | $(OUTPUT_DIR)
-	cp $< $@
+$(OUTPUT_DIR)/%.otf: $(LIG_OUTPUT_DIR)/%.otf $(SLASHED_ZERO_SCRIPT) | $(OUTPUT_DIR)
+	fontforge -lang=py -script $(SLASHED_ZERO_SCRIPT) $< $@
 
 clean:
 	rm -rf $(LIGATURIZER_DIR) $(PAPER_MONO_DIR) $(OUTPUT_DIR)
