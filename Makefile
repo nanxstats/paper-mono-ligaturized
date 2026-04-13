@@ -2,24 +2,34 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eo pipefail -c
 
 LIGATURIZER_DIR := Ligaturizer
-DM_MONO_DIR := dm-mono
+PAPER_MONO_DIR := paper-mono
 OUTPUT_DIR := fonts
 LIG_OUTPUT_DIR := $(LIGATURIZER_DIR)/fonts/output
-DM_TARGET_DIR := $(LIGATURIZER_DIR)/fonts/dm-mono
+PAPER_TARGET_DIR := $(LIGATURIZER_DIR)/fonts/paper-mono
 
-FINAL_FONTS := \
-	$(OUTPUT_DIR)/LigaDMMono-Light.ttf \
-	$(OUTPUT_DIR)/LigaDMMono-LightItalic.ttf \
-	$(OUTPUT_DIR)/LigaDMMono-Regular.ttf \
-	$(OUTPUT_DIR)/LigaDMMono-Italic.ttf \
-	$(OUTPUT_DIR)/LigaDMMono-Medium.ttf \
-	$(OUTPUT_DIR)/LigaDMMono-MediumItalic.ttf
+PAPER_MONO_WEIGHTS := \
+	PaperMono-Thin \
+	PaperMono-ExtraLight \
+	PaperMono-Light \
+	PaperMono-Regular \
+	PaperMono-Medium \
+	PaperMono-SemiBold \
+	PaperMono-Bold \
+	PaperMono-ExtraBold
+
+SOURCE_FONTS := $(addprefix $(PAPER_MONO_DIR)/fonts/otf/,$(addsuffix .otf,$(PAPER_MONO_WEIGHTS)))
+LIG_FONTS := $(addprefix $(LIG_OUTPUT_DIR)/Liga,$(addsuffix .otf,$(PAPER_MONO_WEIGHTS)))
+FINAL_FONTS := $(addprefix $(OUTPUT_DIR)/Liga,$(addsuffix .otf,$(PAPER_MONO_WEIGHTS)))
 
 .DEFAULT_GOAL := all
+.SECONDARY: $(LIG_FONTS)
 
-.PHONY: all deps cleanup clean
+.PHONY: all build deps cleanup clean
 
-all: cleanup
+all: build
+	rm -rf $(LIGATURIZER_DIR) $(PAPER_MONO_DIR)
+
+build: $(FINAL_FONTS)
 
 deps:
 	@if ! command -v fontforge >/dev/null 2>&1; then \
@@ -30,8 +40,8 @@ deps:
 		brew install fontforge; \
 	fi
 
-cleanup: $(FINAL_FONTS)
-	rm -rf $(LIGATURIZER_DIR) $(DM_MONO_DIR)
+cleanup:
+	rm -rf $(LIGATURIZER_DIR) $(PAPER_MONO_DIR)
 
 $(OUTPUT_DIR):
 	mkdir -p $@
@@ -42,13 +52,19 @@ $(LIGATURIZER_DIR)/.git:
 $(LIGATURIZER_DIR)/fonts/fira/.git: $(LIGATURIZER_DIR)/.git
 	git -C $(LIGATURIZER_DIR) submodule update --init --depth 1 fonts/fira
 
-$(DM_MONO_DIR)/.git:
-	git clone https://github.com/googlefonts/dm-mono.git --depth 1 $(DM_MONO_DIR)
+$(PAPER_MONO_DIR)/.git:
+	git clone --branch light-master --single-branch --depth 1 https://github.com/paper-design/paper-mono.git $(PAPER_MONO_DIR)
 
-$(DM_TARGET_DIR)/.prepared: $(DM_MONO_DIR)/.git $(LIGATURIZER_DIR)/.git
-	rm -rf $(DM_TARGET_DIR)
-	mkdir -p $(LIGATURIZER_DIR)/fonts
-	mv $(DM_MONO_DIR)/exports $(DM_TARGET_DIR)
+$(PAPER_MONO_DIR)/fonts/otf/%.otf: $(PAPER_MONO_DIR)/.git
+	@test -f $@
+
+$(PAPER_TARGET_DIR)/.prepared: $(SOURCE_FONTS) $(LIGATURIZER_DIR)/.git
+	rm -rf $(PAPER_TARGET_DIR)
+	mkdir -p $(PAPER_TARGET_DIR)
+	cp $(SOURCE_FONTS) $(PAPER_TARGET_DIR)/
+	@for font in $(PAPER_MONO_WEIGHTS); do \
+		test -f "$(PAPER_TARGET_DIR)/$$font.otf"; \
+	done
 	touch $@
 
 $(LIGATURIZER_DIR)/.patched: Makefile $(LIGATURIZER_DIR)/.git $(LIGATURIZER_DIR)/build.py $(LIGATURIZER_DIR)/ligatures.py
@@ -56,21 +72,16 @@ $(LIGATURIZER_DIR)/.patched: Makefile $(LIGATURIZER_DIR)/.git $(LIGATURIZER_DIR)
 	awk 'BEGIN { in_prefixed=0; in_renamed=0 } \
 	/^prefixed_fonts[[:space:]]*=/ { \
 		print "prefixed_fonts = ["; \
-		print "    \"fonts/dm-mono/DMMono-Regular.ttf\","; \
-		print "    \"fonts/dm-mono/DMMono-Italic.ttf\""; \
 		print "]"; \
 		in_prefixed=1; next; \
 	} \
 	in_prefixed { \
-		if ($$0 ~ /^[[:space:]]*\]/) { in_prefixed=0 } \
+		if ($$0 ~ /^[[:space:]]*]/) { in_prefixed=0 } \
 		next; \
 	} \
 	/^renamed_fonts[[:space:]]*=/ { \
 		print "renamed_fonts = {"; \
-		print "    \"fonts/dm-mono/DMMono-Light.ttf\": \"Liga DM Mono\","; \
-		print "    \"fonts/dm-mono/DMMono-LightItalic.ttf\": \"Liga DM Mono\","; \
-		print "    \"fonts/dm-mono/DMMono-Medium.ttf\": \"Liga DM Mono\","; \
-		print "    \"fonts/dm-mono/DMMono-MediumItalic.ttf\": \"Liga DM Mono\""; \
+		print "  '\''fonts/paper-mono/PaperMono-*.otf'\'': '\''Liga Paper Mono'\''"; \
 		print "}"; \
 		in_renamed=1; \
 		if ($$0 ~ /}/) { in_renamed=0 } \
@@ -99,17 +110,17 @@ $(LIGATURIZER_DIR)/.patched: Makefile $(LIGATURIZER_DIR)/.git $(LIGATURIZER_DIR)
 	skip && $$0 ~ /^[[:space:]]*},[[:space:]]*$$/ { skip=0; next } \
 	skip { next } \
 	{ print }' "$(LIGATURIZER_DIR)/ligatures.py" > $$tmp && mv $$tmp "$(LIGATURIZER_DIR)/ligatures.py"
-	@touch $@
-
-$(LIGATURIZER_DIR)/.built: deps $(LIGATURIZER_DIR)/.patched $(DM_TARGET_DIR)/.prepared $(LIGATURIZER_DIR)/fonts/fira/.git
-	$(MAKE) -C $(LIGATURIZER_DIR)
 	touch $@
 
-$(LIG_OUTPUT_DIR)/%.ttf: | $(LIGATURIZER_DIR)/.built
+$(LIGATURIZER_DIR)/.built: deps $(LIGATURIZER_DIR)/.patched $(PAPER_TARGET_DIR)/.prepared $(LIGATURIZER_DIR)/fonts/fira/.git
+	$(MAKE) -C $(LIGATURIZER_DIR) without-characters
+	touch $@
+
+$(LIG_OUTPUT_DIR)/%.otf: | $(LIGATURIZER_DIR)/.built
 	@test -f $@
 
-$(OUTPUT_DIR)/%.ttf: $(LIG_OUTPUT_DIR)/%.ttf | $(OUTPUT_DIR)
+$(OUTPUT_DIR)/%.otf: $(LIG_OUTPUT_DIR)/%.otf | $(OUTPUT_DIR)
 	cp $< $@
 
 clean:
-	rm -rf $(LIGATURIZER_DIR) $(DM_MONO_DIR) $(OUTPUT_DIR)
+	rm -rf $(LIGATURIZER_DIR) $(PAPER_MONO_DIR) $(OUTPUT_DIR)
