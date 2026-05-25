@@ -55,7 +55,7 @@ Run `make build` in the repository root on macOS with git and Homebrew.
 The Makefile will:
 
 - Reuse local `paper-mono/` and `Ligaturizer/` clones when present, or clone
-  `paper-mono` from the `light-master` branch plus Ligaturizer when missing.
+  `paper-mono` plus Ligaturizer when missing.
 - Initialize only the `fonts/fira` submodule inside Ligaturizer.
 - Stage the eight Paper Mono `otf` files from `paper-mono/fonts/otf/` into
   `Ligaturizer/fonts/paper-mono/`.

@@ -54,7 +54,7 @@ $(LIGATURIZER_DIR)/fonts/fira/.git: $(LIGATURIZER_DIR)/.git
 	git -C $(LIGATURIZER_DIR) submodule update --init --depth 1 fonts/fira
 
 $(PAPER_MONO_DIR)/.git:
-	git clone --branch light-master --single-branch --depth 1 https://github.com/paper-design/paper-mono.git $(PAPER_MONO_DIR)
+	git clone --depth 1 https://github.com/paper-design/paper-mono.git $(PAPER_MONO_DIR)
 
 $(PAPER_MONO_DIR)/fonts/otf/%.otf: $(PAPER_MONO_DIR)/.git
 	@test -f $@
