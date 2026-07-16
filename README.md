@@ -63,7 +63,7 @@ The Makefile will:
   every Paper Mono weight.
 - Remove the same ligatures that were excluded in the DM Mono version.
 - Post-process the ligaturized fonts so `zero.zero` becomes the default `zero`
-  glyph.
+  glyph and every encoded spacing glyph uses Paper Mono's standard cell width.
 - Write the ligaturized `otf` files into `fonts/`.
 
 Run `make` to perform the same build and then remove `paper-mono/` and
