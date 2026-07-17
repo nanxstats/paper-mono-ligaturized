@@ -11,7 +11,13 @@ OpenType features.
 
 ## Setup
 
-Install the ligaturized fonts from `fonts/` using your OS font manager.
+Install with Homebrew:
+
+```bash
+brew install --cask nanxstats/tap/font-paper-mono-ligaturized
+```
+
+Or install the ligaturized fonts from `fonts/` using your OS font manager.
 
 Paper Mono currently ships eight upright weights and no italic styles, so this
 repo generates these variants:
